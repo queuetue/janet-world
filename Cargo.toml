@@ -41,10 +41,10 @@ log = "0.4.29"
 # Error handling
 thiserror = "2.0.18"
 
-# Janet crates (server feature only) — path-relative to janet repo
-janet = { path = "../janet/janet", optional = true }
-janet-client = { path = "../janet/janet-client", optional = true }
-janet-operations = { path = "../janet/janet-operations", optional = true }
+# Janet crates (server feature only) — provided via janet-lib submodule
+janet = { path = "janet-lib/janet", optional = true }
+janet-client = { path = "janet-lib/janet-client", optional = true }
+janet-operations = { path = "janet-lib/janet-operations", optional = true }
 
 # Async runtime (server feature only)
 tokio = { version = "1.49.0", features = [
