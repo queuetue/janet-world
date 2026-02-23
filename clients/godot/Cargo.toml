@@ -1,0 +1,47 @@
+[package]
+name = "janet-world-godot"
+description = "Janet World Engine – Godot 4 GDExtension client"
+version = "0.1.0"
+edition = "2021"
+
+# This crate is NOT a member of the main janet workspace.
+# It is built independently and deployed as a Godot addon.
+#
+# Build:
+#   cargo build --release
+#   cp target/release/libjanet_world_godot.so \
+#      godot/addons/janet_world/libjanet_world_godot.linux.template_release.x86_64.so
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Godot 4 Rust bindings
+godot = "0.2"
+
+# Protocol types + world utilities from the server-side library.
+# The client only uses the `protocol` module — no physics dependency.
+janet-world = { path = "../..", default-features = false }
+
+# Async runtime for the bus thread (isolated from Godot's thread)
+tokio = { version = "1", features = ["rt", "sync", "time", "macros"] }
+
+# NATS transport (same as server)
+async-nats = "0.46"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Thread-safe event channel (bridge thread → Godot thread)
+crossbeam-channel = "0.5"
+
+# Logging
+log = "0.4"
+
+[features]
+# Build without Godot dependency for testing protocol logic in isolation
+headless = ["godot/experimental-godot-api"]
+
+# Keep this crate independent of the root janet workspace.
+[workspace]

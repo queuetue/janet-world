@@ -1,0 +1,72 @@
+[package]
+name = "janet-world"
+description = "Janet World Service – 3D isometric world engine as a standalone bus participant"
+version = "0.1.0"
+edition = "2021"
+authors = ["Scott Russell <srussell@queuetue.com>"]
+license = "MIT"
+
+[lib]
+name = "janet_world"
+path = "src/lib.rs"
+
+[[bin]]
+name = "janet-world-server"
+path = "src/bin/world.rs"
+
+[features]
+# Full server build (binary + bus agent + physics integration).
+# Enabled by default so workspace members get the full crate.
+default = ["server"]
+server = [
+    "dep:janet",
+    "dep:janet-client",
+    "dep:janet-operations",
+    "dep:anyhow",
+    "dep:bytes",
+    "dep:tokio",
+    "dep:parking_lot",
+    "dep:tracing",
+    "dep:tracing-subscriber",
+]
+
+[dependencies]
+# Serialization (always present – needed by protocol types)
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+
+# Logging (always present)
+log = "0.4.29"
+
+# Error handling
+thiserror = "2.0.18"
+
+# Janet crates (server feature only) — path-relative to janet repo
+janet = { path = "../janet/janet", optional = true }
+janet-client = { path = "../janet/janet-client", optional = true }
+janet-operations = { path = "../janet/janet-operations", optional = true }
+
+# Async runtime (server feature only)
+tokio = { version = "1.49.0", features = [
+    "sync",
+    "time",
+    "signal",
+], optional = true }
+
+# Sync primitives (server feature only)
+parking_lot = { version = "0.12.5", optional = true }
+anyhow = { version = "1.0.101", optional = true }
+bytes = { version = "1.11.1", optional = true }
+
+# Logging (server feature only)
+tracing = { version = "0.1.44", optional = true }
+tracing-subscriber = { version = "0.3.22", features = [
+    "env-filter",
+], optional = true }
+
+# CLI + config (binary)
+clap = { version = "4.5.57", features = ["derive", "env"] }
+config = "0.15.19"
+
+[dev-dependencies]
+tokio-test = "0.4.5"

@@ -1,0 +1,18 @@
+[configuration]
+
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.1
+
+[libraries]
+
+; ── Linux ────────────────────────────────────────────────────────────────────
+linux.debug.x86_64     = "res://addons/janet_world/bin/libjanet_world_godot.linux.template_debug.x86_64.so"
+linux.release.x86_64   = "res://addons/janet_world/bin/libjanet_world_godot.linux.template_release.x86_64.so"
+
+; ── macOS ────────────────────────────────────────────────────────────────────
+macos.debug             = "res://addons/janet_world/bin/libjanet_world_godot.macos.template_debug.universal.dylib"
+macos.release           = "res://addons/janet_world/bin/libjanet_world_godot.macos.template_release.universal.dylib"
+
+; ── Windows ──────────────────────────────────────────────────────────────────
+windows.debug.x86_64   = "res://addons/janet_world/bin/janet_world_godot.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/janet_world/bin/janet_world_godot.windows.template_release.x86_64.dll"
