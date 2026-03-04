@@ -1,0 +1,62 @@
+[
+  {
+    "seed": 42,
+    "cx": 0,
+    "cy": 0,
+    "samples": [
+      {"lx": 0, "ly": 0, "terrain": "grass", "elevation": 0.4237, "resources": 0.4945, "hazard": 0.5837},
+      {"lx": 1, "ly": 2, "terrain": "grass", "elevation": 0.5039, "resources": 0.5324, "hazard": 0.5128},
+      {"lx": 5, "ly": 10, "terrain": "grass", "elevation": 0.5324, "resources": 0.3864, "hazard": 0.5759},
+      {"lx": 10, "ly": 5, "terrain": "grass", "elevation": 0.397, "resources": 0.5697, "hazard": 0.5757},
+      {"lx": 15, "ly": 15, "terrain": "grass", "elevation": 0.5165, "resources": 0.5448, "hazard": 0.2505}
+    ]
+  },
+  {
+    "seed": 42,
+    "cx": -1,
+    "cy": 2,
+    "samples": [
+      {"lx": 0, "ly": 0, "terrain": "forest", "elevation": 0.6083, "resources": 0.5863, "hazard": 0.5179},
+      {"lx": 1, "ly": 2, "terrain": "forest", "elevation": 0.5813, "resources": 0.5937, "hazard": 0.541},
+      {"lx": 5, "ly": 10, "terrain": "swamp", "elevation": 0.3003, "resources": 0.7003, "hazard": 0.4354},
+      {"lx": 10, "ly": 5, "terrain": "grass", "elevation": 0.4346, "resources": 0.5231, "hazard": 0.495},
+      {"lx": 15, "ly": 15, "terrain": "grass", "elevation": 0.327, "resources": 0.304, "hazard": 0.5663}
+    ]
+  },
+  {
+    "seed": 1337,
+    "cx": 3,
+    "cy": -4,
+    "samples": [
+      {"lx": 0, "ly": 0, "terrain": "grass", "elevation": 0.5323, "resources": 0.5058, "hazard": 0.6549},
+      {"lx": 1, "ly": 2, "terrain": "grass", "elevation": 0.5229, "resources": 0.531, "hazard": 0.3654},
+      {"lx": 5, "ly": 10, "terrain": "grass", "elevation": 0.3651, "resources": 0.4194, "hazard": 0.4964},
+      {"lx": 10, "ly": 5, "terrain": "grass", "elevation": 0.3913, "resources": 0.3791, "hazard": 0.4423},
+      {"lx": 15, "ly": 15, "terrain": "grass", "elevation": 0.5025, "resources": 0.6066, "hazard": 0.4337}
+    ]
+  },
+  {
+    "seed": 20250304,
+    "cx": 7,
+    "cy": 7,
+    "samples": [
+      {"lx": 0, "ly": 0, "terrain": "rock", "elevation": 0.7354, "resources": 0.6594, "hazard": 0.7429},
+      {"lx": 1, "ly": 2, "terrain": "forest", "elevation": 0.6617, "resources": 0.7008, "hazard": 0.7813},
+      {"lx": 5, "ly": 10, "terrain": "grass", "elevation": 0.4275, "resources": 0.5522, "hazard": 0.6636},
+      {"lx": 10, "ly": 5, "terrain": "grass", "elevation": 0.3754, "resources": 0.34, "hazard": 0.3913},
+      {"lx": 15, "ly": 15, "terrain": "sand", "elevation": 0.2198, "resources": 0.2647, "hazard": 0.8453}
+    ]
+  },
+  {
+    "seed": 987654321,
+    "cx": -8,
+    "cy": -3,
+    "samples": [
+      {"lx": 0, "ly": 0, "terrain": "forest", "elevation": 0.6748, "resources": 0.3482, "hazard": 0.1762},
+      {"lx": 1, "ly": 2, "terrain": "forest", "elevation": 0.6219, "resources": 0.4397, "hazard": 0.0547},
+      {"lx": 5, "ly": 10, "terrain": "grass", "elevation": 0.5144, "resources": 0.4277, "hazard": 0.5889},
+      {"lx": 10, "ly": 5, "terrain": "grass", "elevation": 0.5608, "resources": 0.5939, "hazard": 0.426},
+      {"lx": 15, "ly": 15, "terrain": "grass", "elevation": 0.3703, "resources": 0.7419, "hazard": 0.486}
+    ]
+  }
+]

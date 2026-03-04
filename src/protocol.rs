@@ -62,6 +62,8 @@ pub struct ChunkActivated {
     pub cy: i32,
     /// Terrain seed — sufficient for deterministic local generation.
     pub seed: u64,
+    /// Canonical terrain seed (explicit field for cross-language alignment).
+    pub terrain_seed: u64,
     /// 0 = full detail, 1 = half, 2 = quarter.
     pub lod: u8,
     /// World-space size of one chunk side.

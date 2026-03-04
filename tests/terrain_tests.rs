@@ -47,9 +47,9 @@ mod tests {
         for x in [-100, 0, 100, 500] {
             for y in [-100, 0, 100, 500] {
                 let h = t.height_at(x as f32, y as f32);
-                // placeholder sine noise yields values in [-10, 10]
+                // canonical terrain elevation is normalised to [0, 1]
                 assert!(
-                    h >= -15.0 && h <= 15.0,
+                    h >= 0.0 && h <= 1.0,
                     "height {} out of expected range at ({}, {})",
                     h,
                     x,

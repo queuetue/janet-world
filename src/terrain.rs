@@ -3,11 +3,121 @@
 
 use crate::types::Vec3;
 use janet_operations::physics::types::ColliderShape;
+use md5;
 use parking_lot::RwLock;
 use std::any::Any;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::sync::Arc;
+
+const CANONICAL_TILE_SIZE: i32 = 16;
+
+#[derive(Debug, Clone)]
+pub struct CanonicalTileSample {
+    pub terrain: String,
+    pub elevation: f32,
+    pub resources: f32,
+    pub hazard: f32,
+}
+
+fn classify_terrain(elevation: f64) -> &'static str {
+    if elevation < 0.18 {
+        "water"
+    } else if elevation < 0.28 {
+        "sand"
+    } else if elevation < 0.32 {
+        "swamp"
+    } else if elevation < 0.58 {
+        "grass"
+    } else if elevation < 0.72 {
+        "forest"
+    } else if elevation < 0.84 {
+        "rock"
+    } else if elevation < 0.94 {
+        "snow"
+    } else {
+        "desert"
+    }
+}
+
+fn hash_float(ix: i32, iy: i32, salt: u64) -> f64 {
+    let key = format!("{}:{}:{}", ix, iy, salt);
+    let digest = md5::compute(key.as_bytes());
+    let low = ((digest.0[14] as u16) << 8) | digest.0[15] as u16;
+    low as f64 / 65535.0
+}
+
+fn lerp(a: f64, b: f64, t: f64) -> f64 {
+    a + (b - a) * t
+}
+
+fn smooth_step(t: f64) -> f64 {
+    t * t * (3.0 - 2.0 * t)
+}
+
+fn smooth_noise(wx: f64, wy: f64, scale: f64, salt: u64) -> f64 {
+    let sx = wx * scale;
+    let sy = wy * scale;
+    let ix = sx.floor() as i32;
+    let iy = sy.floor() as i32;
+    let fx = smooth_step(sx - ix as f64);
+    let fy = smooth_step(sy - iy as f64);
+    let v00 = hash_float(ix, iy, salt);
+    let v10 = hash_float(ix + 1, iy, salt);
+    let v01 = hash_float(ix, iy + 1, salt);
+    let v11 = hash_float(ix + 1, iy + 1, salt);
+    lerp(lerp(v00, v10, fx), lerp(v01, v11, fx), fy)
+}
+
+fn clamp01(v: f64) -> f64 {
+    v.clamp(0.0, 1.0)
+}
+
+fn elevation(wx: f64, wy: f64, seed: u64) -> f64 {
+    clamp01(
+        0.50 * smooth_noise(wx, wy, 0.04, seed ^ 0x1111)
+            + 0.30 * smooth_noise(wx, wy, 0.10, seed ^ 0x2222)
+            + 0.20 * smooth_noise(wx, wy, 0.25, seed ^ 0x3333),
+    )
+}
+
+fn resources(wx: f64, wy: f64, seed: u64) -> f64 {
+    clamp01(
+        0.65 * smooth_noise(wx, wy, 0.07, seed ^ 0x4444)
+            + 0.35 * smooth_noise(wx, wy, 0.18, seed ^ 0x5555),
+    )
+}
+
+fn hazard(wx: f64, wy: f64, seed: u64) -> f64 {
+    smooth_noise(wx, wy, 0.15, seed ^ 0x6666)
+}
+
+fn round4(v: f64) -> f64 {
+    (v * 10_000.0).round() / 10_000.0
+}
+
+pub fn sample_canonical_tile(seed: u64, cx: i32, cy: i32, lx: i32, ly: i32) -> CanonicalTileSample {
+    let wx = (cx * CANONICAL_TILE_SIZE + lx) as f64;
+    let wy = (cy * CANONICAL_TILE_SIZE + ly) as f64;
+
+    let elev = elevation(wx, wy, seed);
+    let mut terrain = classify_terrain(elev).to_string();
+    let mut res = resources(wx, wy, seed);
+    let mut haz = hazard(wx, wy, seed);
+
+    if terrain == "water" {
+        res = 0.0;
+        haz = haz.max(0.35);
+        terrain = "water".to_string();
+    }
+
+    CanonicalTileSample {
+        terrain,
+        elevation: round4(elev) as f32,
+        resources: round4(res) as f32,
+        hazard: round4(haz) as f32,
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Trait
@@ -147,14 +257,9 @@ impl HeightmapTerrain {
         }
     }
 
-    /// Placeholder noise – REPLACE with fractal Brownian Motion (Phase 1).
+    /// Canonical deterministic elevation noise aligned with Python world generator.
     fn sample_noise(&self, x: f32, y: f32) -> f32 {
-        let scale = 0.01;
-        // Mix seed into the sample so different worlds differ visibly.
-        // Using a simple but effective hash trick: combine seed bits into
-        // float phase offsets in a range that matters.
-        let s = (self.seed.wrapping_mul(6364136223846793005).wrapping_add(1) as f32) * 1e-9;
-        ((x * scale + s).sin() * (y * scale + s).cos()) * 10.0
+        elevation(x as f64, y as f64, self.seed) as f32
     }
 }
 

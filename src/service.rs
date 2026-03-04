@@ -141,6 +141,7 @@ impl WorldService {
                     cx: coord.x,
                     cy: coord.y,
                     seed,
+                    terrain_seed: seed,
                     lod: 0,
                     chunk_size,
                 }
@@ -289,6 +290,7 @@ impl WorldService {
             cx: coord.x,
             cy: coord.y,
             seed,
+            terrain_seed: seed,
             lod: 0,
             chunk_size,
         }))
