@@ -1,0 +1,15 @@
+apiVersion: v2
+name: janet-world
+description: Janet World Engine – 3D isometric world service as a standalone bus participant
+type: application
+version: 0.1.0
+appVersion: "main"
+keywords:
+  - janet
+  - world
+  - nats
+  - physics
+sources:
+  - https://github.com/queuetue/janet-world
+maintainers:
+  - name: queuetue

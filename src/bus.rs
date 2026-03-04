@@ -137,6 +137,7 @@ impl WorldBusAgent {
             .participant(&self.config.participant_id, vec!["world".to_string()])
             .capability("external_physics", true)
             .capability("world_engine", "janet-world")
+            .coordinator_url(&self.config.endpoint)
             .connect()
             .await
             .context("Failed to connect world service to janet bus")?;

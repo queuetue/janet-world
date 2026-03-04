@@ -1,0 +1,68 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "janet-world.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "janet-world.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "janet-world.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "janet-world.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "janet-world.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: world
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: WORLD_SESSION
+              value: {{ .Values.world.session | quote }}
+            - name: WORLD_PARTICIPANT_ID
+              value: {{ .Values.world.participantId | quote }}
+            - name: WORLD_ENDPOINT
+              value: {{ .Values.world.endpoint | quote }}
+            - name: WORLD_TICK_RATE_HZ
+              value: {{ .Values.world.tickRateHz | quote }}
+            - name: WORLD_SEED
+              value: {{ .Values.world.seed | quote }}
+            - name: WORLD_CELL_SIZE
+              value: {{ .Values.world.cellSize | quote }}
+            - name: WORLD_ACTIVATION_RADIUS
+              value: {{ .Values.world.activationRadius | quote }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

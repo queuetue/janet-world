@@ -1,2 +1,6 @@
+**/*.rs.bk
+**/target/
+**/Cargo.lock
+
 .redacted/
 target/

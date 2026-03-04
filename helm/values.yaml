@@ -1,0 +1,60 @@
+# Default values for the janet-world service.
+
+image:
+  repository: ghcr.io/queuetue/janet-world
+  tag: "main"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+replicaCount: 1
+
+# ── World engine configuration ────────────────────────────────────────────────
+# These map directly to the janet-world-server CLI flags / env vars.
+world:
+  # Janet session name to join on the bus.
+  session: "rally"
+
+  # Participant ID advertised on the bus.
+  participantId: "world-service"
+
+  # NATS endpoint.  In-cluster this should point to your NATS service.
+  # The NATS cluster lives in the `nats` namespace; use full DNS for cross-namespace access.
+  endpoint: "nats://nats.nats.svc.cluster.local:4222"
+
+  # Physics / streaming tick rate (Hz).
+  tickRateHz: 30
+
+  # Terrain generation seed.
+  seed: 42
+
+  # Streaming cell size in world units.
+  cellSize: 10.0
+
+  # Chebyshev streaming activation radius (in cells).
+  activationRadius: 16
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Extra environment variables injected into the world pod.
+# Example: enable verbose tracing
+#   extraEnv:
+#     - name: RUST_LOG
+#       value: debug
+extraEnv: []
