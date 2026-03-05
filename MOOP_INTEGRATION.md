@@ -290,9 +290,20 @@ coordinator config publication.
 
 ---
 
+## Status Snapshot *(2026-03-04)*
+
+- **Phase A:** mostly complete in moop; janet-world protocol/config extensions still pending.
+- **Phase A.2:** complete (canonical vectors + Rust/Python terrain parity + `terrain_seed`).
+- **Phase B:** complete (projection adapter writing chunk summaries to local chem).
+- **Phase C:** moop-side intent wiring complete; janet-world `action.*` execution items remain coordinator/world validation work.
+- **Phase D:** complete (`lod` carried end-to-end in moop state/protocol and LOD-aware fog decay).
+- **Phase E:** complete on moop side (structure/entity chem projection, state storage, and WS lifecycle messages).
+
+---
+
 ## Implementation Phases
 
-### Phase A — Shared Scale Constants *(done)*
+### Phase A — Shared Scale Constants *(mostly done)*
 
 - [x] `TILE_SIZE_M = 2.0`, `CHUNK_SIZE_M = 32.0`, `MOVE_STEP_M = 1.0` defined in moop.
 - [x] `world_info` message sent on WS connect.
@@ -313,14 +324,14 @@ The Rust side must produce byte-identical tile values for the same `(seed, cx, c
 
 Deliverables:
 
-- [ ] Pin canonical test vectors from the Python generator into
+- [x] Pin canonical test vectors from the Python generator into
   `tests/terrain_alignment_vectors.json` (at least 5 seed/chunk pairs,
   spot-checking individual tiles).
-- [ ] Implement MD5-seeded value noise in Rust (`janet-world/src/terrain.rs`)
+- [x] Implement MD5-seeded value noise in Rust (`janet-world/src/terrain.rs`)
   matching the Python algorithm exactly (same hash key format, same smoothstep,
   same octave weights).
-- [ ] Integration test asserting tile-for-tile equality for all pinned vectors.
-- [ ] Add `terrain_seed` field to `ChunkActivated` protocol message.
+- [x] Integration test asserting tile-for-tile equality for all pinned vectors.
+- [x] Add `terrain_seed` field to `ChunkActivated` protocol message.
 
 ### Phase B — Chem Projection Layer
 
@@ -354,12 +365,12 @@ class MoopProjection:
 
 Deliverables:
 
-- [ ] `moop/projection.py` — `MoopProjection` subscribes to `world.chunk.activated`,
+- [x] `moop/projection.py` — `MoopProjection` subscribes to `world.chunk.activated`,
   writes chem summary key.
-- [ ] Projection respects `activation_radius` — only writes chunks within
+- [x] Projection respects `activation_radius` — only writes chunks within
   the moop's perception radius.
-- [ ] Tile detail written lazily by the moop on `sense`, not by the projection.
-- [ ] Integration test: projection writes chem, moop reads it, WS client
+- [x] Tile detail written lazily by the moop on `sense`, not by the projection.
+- [x] Integration test: projection writes chem, moop reads it, WS client
   receives `CHUNK_ENTER` with correct summary.
 
 ### Phase C — Connected-Mode Intent Wiring
@@ -376,9 +387,9 @@ through the coordinator.
 
 Deliverables:
 
-- [ ] `ExplorerMoop.send_command` maps intent names to `SUBJECTS.*` constants
+- [x] `ExplorerMoop.send_command` maps intent names to `SUBJECTS.*` constants
   from `plantangenet.world.protocol`.
-- [ ] `WorldClient.move()` / `teleport()` / `interact()` used in connected
+- [x] `WorldClient.move()` / `teleport()` / `interact()` used in connected
   mode (already exist in `plantangenet.world.client`).
 - [ ] janet-world handles `action.move` — apply velocity to physics body.
 - [ ] janet-world handles `action.interact` — resolve resource depletion,
@@ -403,10 +414,10 @@ In practice:
 
 Deliverables:
 
-- [ ] `ChunkActivated` includes `lod` field.
-- [ ] Projection layer includes `lod` in its chem observation.
-- [ ] `MoopChunk` gains `lod: int = 0` field.
-- [ ] `MoopState.decay_confidence` accounts for LOD — distant chunks decay slower.
+- [x] `ChunkActivated` includes `lod` field.
+- [x] Projection layer includes `lod` in its chem observation.
+- [x] `MoopChunk` gains `lod: int = 0` field.
+- [x] `MoopState.decay_confidence` accounts for LOD — distant chunks decay slower.
 
 ### Phase E — Entity & Structure Streaming
 
@@ -423,6 +434,15 @@ Moop's `MoopState` grows corresponding dicts; `ws_protocol` gains
 `CHUNK_ENTER`).
 
 This is Phase 3+ work — terrain integration comes first.
+
+Deliverables:
+
+- [x] Projection layer writes `region/structures/{pid}` and `region/entities/{pid}`.
+- [x] `MoopState` tracks structures/entities and emits lifecycle deltas.
+- [x] `ws_protocol` includes `STRUCTURE_ENTER` / `STRUCTURE_EXIT` and
+  `ENTITY_ENTER` / `ENTITY_UPDATE` / `ENTITY_EXIT` builders.
+- [x] `ExplorerMoop` broadcasts structure/entity lifecycle messages each frame.
+- [x] Integration tests cover projection/state/ws lifecycle behavior.
 
 ---
 
@@ -459,6 +479,8 @@ to `reality.*` events received from the bus.
 | --- | --- | --- | --- |
 | `region/observation/{pid}` | projection adapter | `reality.chunk.activated` | `{ chunk_id: summary_dict }` |
 | `region/tiles/{pid}/{chunk_id}` | moop (on `sense`) | `reality.chunk.activated` + local regen | `{ width, height, tiles: [...] }` |
+| `region/structures/{pid}` | projection adapter | `reality.structure.spawned` / `reality.structure.removed` | `{ structure_id: { type_id, x, y, z, rotation_y, metadata } }` |
+| `region/entities/{pid}` | projection adapter | `reality.entity.spawned` / `reality.entity.transform` / `reality.entity.removed` | `{ entity_id: { archetype, x, y, z, rotation_y, vx, vy, vz, metadata } }` |
 | `region/participant/{pid}/position` | moop executor | `reality.entity.transform` | `{ "x": f, "y": f }` |
 | `expedition/squad/{squad_id}/members` | moop executor | `reality.squad.*` | `[pid, ...]` |
 | `expedition/phase` | moop executor | `reality.expedition.*` | `"exploring"` etc. |

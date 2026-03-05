@@ -88,4 +88,37 @@ mod tests {
         // Before any participants both should be identical
         assert_eq!(svc_a.stats().active_cells, svc_b.stats().active_cells);
     }
+
+    // -----------------------------------------------------------------------
+    // action.move handling
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn apply_move_action_updates_position_with_fallback_integration() {
+        let mut svc = make_service(2);
+        svc.register_participant("alice".into(), Vec3::new(0.0, 0.0, 0.0));
+
+        // No default simulation body is configured in this test setup,
+        // so service should use deterministic fallback integration.
+        svc.apply_move_action("alice", 2.0, -1.0, 0.0)
+            .expect("apply_move_action should succeed for known participant");
+
+        let snapshot = svc.build_snapshot("test");
+        let alice = snapshot
+            .entities
+            .iter()
+            .find(|e| e.entity_id == "alice")
+            .expect("participant should appear as snapshot entity");
+
+        let dt = WorldServiceConfig::default().physics_dt;
+        assert!((alice.x - (2.0 * dt)).abs() < 1e-6);
+        assert!((alice.y - (-1.0 * dt)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn apply_move_action_rejects_unknown_participant() {
+        let mut svc = make_service(2);
+        let result = svc.apply_move_action("missing", 1.0, 0.0, 0.0);
+        assert!(result.is_err());
+    }
 }

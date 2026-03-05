@@ -78,6 +78,50 @@ impl WorldService {
         self.participant_positions.len()
     }
 
+    /// Apply a coordinator-approved movement action for a participant.
+    ///
+    /// Preferred path: apply velocity to the participant's physics body.
+    /// Fallback path: integrate in tracked participant positions when no
+    /// simulation/body is available (keeps deterministic progress in minimal
+    /// test and degraded runtime environments).
+    pub fn apply_move_action(
+        &mut self,
+        participant_id: &str,
+        dx: f32,
+        dy: f32,
+        _dz: f32,
+    ) -> janet::Result<()> {
+        if !self.participant_positions.contains_key(participant_id) {
+            return Err(janet::JanetError::Other(format!(
+                "Unknown participant_id '{}'",
+                participant_id
+            )));
+        }
+
+        // Try authoritative physics velocity first.
+        let mut applied_in_physics = false;
+        {
+            let mut registry = self.physics_registry.write();
+            if let Some(sim) = registry.default_simulation_mut() {
+                if sim.set_velocity(participant_id, (dx, dy)).is_ok() {
+                    applied_in_physics = true;
+                }
+            }
+        }
+
+        if applied_in_physics {
+            return Ok(());
+        }
+
+        // Fallback integration path when no body/simulation is available.
+        if let Some(pos) = self.participant_positions.get_mut(participant_id) {
+            pos.x += dx * self.config.physics_dt;
+            pos.y += dy * self.config.physics_dt;
+        }
+
+        Ok(())
+    }
+
     // -----------------------------------------------------------------------
     // Main tick
     // -----------------------------------------------------------------------
@@ -142,6 +186,8 @@ impl WorldService {
                     cy: coord.y,
                     seed,
                     terrain_seed: seed,
+                    tile_resolution: self.config.tile_size_m,
+                    terrain_algo_version: "md5_value_noise_v1".to_string(),
                     lod: 0,
                     chunk_size,
                 }
@@ -291,6 +337,8 @@ impl WorldService {
             cy: coord.y,
             seed,
             terrain_seed: seed,
+            tile_resolution: self.config.tile_size_m,
+            terrain_algo_version: "md5_value_noise_v1".to_string(),
             lod: 0,
             chunk_size,
         }))

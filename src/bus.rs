@@ -61,6 +61,20 @@ pub struct TeleportMsg {
     pub z: f32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActionMoveMsg {
+    #[serde(default)]
+    pub participant_id: Option<String>,
+    #[serde(default)]
+    pub entity_id: Option<String>,
+    #[serde(default)]
+    pub id: Option<String>,
+    pub dx: f32,
+    pub dy: f32,
+    #[serde(default)]
+    pub dz: f32,
+}
+
 // ---------------------------------------------------------------------------
 // Config for WorldBusAgent
 // ---------------------------------------------------------------------------
@@ -219,6 +233,43 @@ impl WorldBusAgent {
                             svc.lock()
                                 .register_participant(m.id, Vec3::new(m.x, m.y, m.z));
                             Ok(CommandResponse::success(cmd.command_id, None))
+                        }
+                        Err(e) => Ok(CommandResponse::failed(
+                            cmd.command_id,
+                            format!("Invalid payload: {}", e),
+                        )),
+                    }
+                }
+            });
+        }
+
+        // action.move (coordinator-approved movement)
+        {
+            let svc = self.service.clone();
+            client.on_command(subjects::ACTION_MOVE, move |cmd| {
+                let payload_val =
+                    serde_json::Value::Object(cmd.payload.clone().into_iter().collect());
+                let svc = svc.clone();
+                async move {
+                    match serde_json::from_value::<ActionMoveMsg>(payload_val) {
+                        Ok(m) => {
+                            let actor_id =
+                                m.participant_id.or(m.entity_id).or(m.id).ok_or_else(|| {
+                                    "Missing participant_id/entity_id/id in action.move payload"
+                                        .to_string()
+                                });
+
+                            match actor_id {
+                                Ok(id) => match svc.lock().apply_move_action(&id, m.dx, m.dy, m.dz)
+                                {
+                                    Ok(()) => Ok(CommandResponse::success(cmd.command_id, None)),
+                                    Err(e) => Ok(CommandResponse::failed(
+                                        cmd.command_id,
+                                        format!("action.move failed: {}", e),
+                                    )),
+                                },
+                                Err(msg) => Ok(CommandResponse::failed(cmd.command_id, msg)),
+                            }
                         }
                         Err(e) => Ok(CommandResponse::failed(
                             cmd.command_id,

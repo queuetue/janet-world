@@ -13,6 +13,7 @@
 //! | `WORLD_TICK_RATE_HZ`       | `30`                | Physics / streaming tick rate  |
 //! | `WORLD_SEED`               | `42`                | Terrain seed                   |
 //! | `WORLD_CELL_SIZE`          | `10.0`              | Streaming cell size (world units) |
+//! | `WORLD_TILE_SIZE_M`        | `2.0`               | Terrain tile size in metres    |
 //! | `WORLD_ACTIVATION_RADIUS`  | `16`                | Chebyshev streaming radius     |
 
 use anyhow::Result;
@@ -64,6 +65,10 @@ struct Args {
     #[arg(long, env = "WORLD_CELL_SIZE", default_value_t = 10.0)]
     cell_size: f32,
 
+    /// Terrain tile size in metres
+    #[arg(long, env = "WORLD_TILE_SIZE_M", default_value_t = 2.0)]
+    tile_size_m: f32,
+
     /// Streaming activation radius (Chebyshev, in cells)
     #[arg(long, env = "WORLD_ACTIVATION_RADIUS", default_value_t = 16)]
     activation_radius: i32,
@@ -86,10 +91,11 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     log::info!(
-        "Starting janet-world-server (session='{}', seed={}, cell_size={}, radius={})",
+        "Starting janet-world-server (session='{}', seed={}, cell_size={}, tile_size_m={}, radius={})",
         args.session,
         args.seed,
         args.cell_size,
+        args.tile_size_m,
         args.activation_radius,
     );
 
@@ -129,6 +135,7 @@ async fn main() -> Result<()> {
         cell_size: args.cell_size,
         activation_radius: args.activation_radius,
         world_seed: args.seed,
+        tile_size_m: args.tile_size_m,
         physics_dt: 1.0 / args.tick_rate_hz,
         ..Default::default()
     };

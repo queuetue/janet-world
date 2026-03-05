@@ -21,6 +21,14 @@
 
 use serde::{Deserialize, Serialize};
 
+fn default_tile_resolution() -> f32 {
+    2.0
+}
+
+fn default_terrain_algo_version() -> String {
+    "md5_value_noise_v1".to_string()
+}
+
 // ---------------------------------------------------------------------------
 // Common envelope
 // ---------------------------------------------------------------------------
@@ -64,6 +72,12 @@ pub struct ChunkActivated {
     pub seed: u64,
     /// Canonical terrain seed (explicit field for cross-language alignment).
     pub terrain_seed: u64,
+    /// Terrain tile resolution in metres-per-tile.
+    #[serde(default = "default_tile_resolution")]
+    pub tile_resolution: f32,
+    /// Terrain algorithm version, used to detect cross-client divergence.
+    #[serde(default = "default_terrain_algo_version")]
+    pub terrain_algo_version: String,
     /// 0 = full detail, 1 = half, 2 = quarter.
     pub lod: u8,
     /// World-space size of one chunk side.
@@ -260,6 +274,9 @@ pub mod subjects {
     pub const INTENT_INTERACT: &str = "intent.interact";
     pub const INTENT_TELEPORT: &str = "intent.teleport";
     pub const INTENT_VIEW_RADIUS: &str = "intent.view_radius";
+
+    pub const ACTION_MOVE: &str = "action.move";
+    pub const ACTION_INTERACT: &str = "action.interact";
 
     pub const CMD_STATS: &str = "world.cmd.stats";
     pub const CMD_SNAPSHOT: &str = "world.cmd.snapshot";

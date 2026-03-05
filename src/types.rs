@@ -88,6 +88,8 @@ pub struct WorldServiceConfig {
     pub activation_radius: i32,
     /// Deterministic noise seed.
     pub world_seed: u64,
+    /// Terrain tile size in world-space metres.
+    pub tile_size_m: f32,
     /// Density of tree objects per cell (future use).
     pub tree_density: f32,
     /// Physics integration step size in seconds.
@@ -100,6 +102,7 @@ impl Default for WorldServiceConfig {
             cell_size: 10.0,
             activation_radius: 16,
             world_seed: 42,
+            tile_size_m: 2.0,
             tree_density: 0.02,
             physics_dt: 1.0 / 30.0,
         }
