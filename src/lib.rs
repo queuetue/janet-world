@@ -1,6 +1,6 @@
 //! Janet World Engine
 //!
-//! A 3D isometric world engine running as a standalone janet bus participant.
+//! A 3D world engine running as a standalone janet bus participant.
 //!
 //! ## Architecture
 //!
